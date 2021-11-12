@@ -1,12 +1,12 @@
 BIN_DIR=../bin
 PROGRAM=$(BIN_DIR)/cholesky-tsk
 
-MKL_HOME=/apps/INTEL/2017.4/mkl
+BLAS_HOME=/usr/lib/x86_64-linux-gnu/openblas/
 
 CC=gcc
-CFLAGS=-O3 -std=gnu99 -I$(MKL_HOME)/include -fopenmp
-LDFLAGS=-L$(MKL_HOME)/lib/intel64 -lmkl_sequential -lmkl_core -lmkl_rt -lpthread -lm -fopenmp
-VERBOSE=-DVERBOSE
+CFLAGS=-O3 -std=gnu99 -I$(BLAS_HOME)/include -fopenmp
+LDFLAGS=-L$(BLAS_HOME) -lblas -llapack -llapacke -lpthread -lm -fopenmp
+#VERBOSE=-DVERBOSE
 
 all: $(PROGRAM) 
 
