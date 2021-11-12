@@ -9,7 +9,8 @@
 #include <sys/times.h>
 
 #include <math.h>
-#include <mkl.h>
+#include <cblas.h>
+#include <lapacke.h>
 
 #include "omp.h"
 
@@ -97,11 +98,11 @@ static int check_factorization(int N, double *A1, double *A2, int LDA, char uplo
 	if (uplo == 'U'){
 		dlacpy_(&UP, &N, &N, A2, &LDA, L1, &N);
 		dlacpy_(&UP, &N, &N, A2, &LDA, L2, &N);
-		dtrmm(&LO, &uplo, &TR, &NU, &N, &N, &alpha, L1, &N, L2, &N);
+		cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, N, alpha, L1, N, L2, N);
 	} else{
 		dlacpy_(&LO, &N, &N, A2, &LDA, L1, &N);
 		dlacpy_(&LO, &N, &N, A2, &LDA, L2, &N);
-		dtrmm(&RI, &LO, &TR, &NU, &N, &N, &alpha, L1, &N, L2, &N);
+		cblas_dtrmm(CblasColMajor, CblasRight, CblasLower, CblasTrans, CblasNonUnit, N, N, alpha, L1, N, L2, N);
 	}
 
 	/* Compute the Residual || A -L'L|| */
@@ -128,7 +129,7 @@ static int check_factorization(int N, double *A1, double *A2, int LDA, char uplo
 	return info_factorization;
 }
 
-void initialize_matrix(const int n, const int ts, double *matrix)
+void initialize_matrix(int n, const int ts, double *matrix)
 {
 #ifdef VERBOSE
 	printf("> Initializing matrix with random values...\n");
@@ -138,7 +139,7 @@ void initialize_matrix(const int n, const int ts, double *matrix)
 	int intONE=1;
 
 	for (int i = 0; i < n*n; i+=n) {
-		dlarnv_(&intONE, &ISEED[0], &n, &matrix[i]);
+		LAPACK_dlarnv(&intONE, &ISEED[0], &n, &matrix[i]);
 	}
 
 	for (int i=0; i<n; i++) {
